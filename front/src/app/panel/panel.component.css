@@ -1,0 +1,67 @@
+.app-panel {
+    margin: 0 auto;
+    height: 60%;
+    width: 50%;
+    padding-top: 15vh;
+}
+
+.app-card {
+    height: 100%;
+    text-align: center;
+}
+
+.menu-button {
+    margin: 0 auto;
+    margin-top: 2vh !important;
+    cursor: pointer;
+    font-size: 1.1em;
+    border: 1px solid black;
+    width: 40%;
+    user-select: none;
+}
+
+.nav-link {
+    color: inherit;
+    display: inline-block;
+    width: 100%;
+    padding-top: 2.5vh;
+    text-decoration: none;
+}
+
+.big-icon {
+    font-size: 5vh;
+}
+
+.icon-label {
+    margin-top: 0;
+}
+
+input[type=file] {
+    display: none;
+}
+
+@media only screen and (max-width: 755px) {
+    .app-panel {
+        height: 70%;
+        padding-top: 10vh;
+    }
+
+    .menu-button {
+        width: 60%;
+    }
+
+    .nav-link {
+        padding-top: 2vh;
+    }
+}
+
+@media only screen and (max-width: 490px) {
+    .app-panel {
+        height: 80%;
+        width: 90%;
+        padding-top: 10vh;
+    }
+    .menu-button {
+        width: 60%;
+    }
+}

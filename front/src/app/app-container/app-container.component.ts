@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { PanelComponent } from '../panel/panel.component';
 
 @Component({
   selector: 'app-container',
