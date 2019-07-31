@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.ws.rs.PathParam;
+import java.util.List;
 
 
 @RestController
@@ -22,25 +22,24 @@ public class DocumentController {
 
     @PostMapping
     public ResponseEntity<MessageHolder> uploadDocument(@RequestParam("document") MultipartFile document) throws CustomException {
-
-        documentService.uploadDocument(document);
-
-        return new ResponseEntity<>(new MessageHolder("20 rows were added"), HttpStatus.CREATED);
+        int numberOfRows = documentService.uploadDocument(document);
+        return new ResponseEntity<>(new MessageHolder(numberOfRows + " rows were added"), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public String getRows() {
-        return "getting documents";
+    public ResponseEntity<List<ExcelRow>> getRows() {
+        return new ResponseEntity<>(documentService.getRows(), HttpStatus.OK);
     }
 
     @PutMapping
-    public String updateRow(@RequestBody ExcelRow row) {
-        return "updating rows";
+    public ResponseEntity<ExcelRow> updateRow(@RequestBody ExcelRow row) {
+        return new ResponseEntity<>(documentService.updateRow(row), HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public String deleteRow(@PathParam("id") int id) {
-        return "deleting row";
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity deleteRow(@PathVariable Long id) {
+        documentService.deleteRow(id);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
 }
