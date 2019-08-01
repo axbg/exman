@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-grid',
@@ -56,7 +56,7 @@ export class GridComponent implements OnInit {
   ];
   filteredRows = this.rows;
 
-  constructor() {
+  constructor(private el: ElementRef) {
 
   }
 
@@ -91,7 +91,11 @@ export class GridComponent implements OnInit {
     this.dateDropdown.splice(0, 0, "");
   }
 
-    //combine all filters and use a switch based on event target name
+  //combine all filters and use a switch based on event target name
+  applyFilter(e) {
+
+  }
+
   applyAmountFilter(e) {
     this.amountFilter = e;
     this.applyFilters();
@@ -118,19 +122,35 @@ export class GridComponent implements OnInit {
   }
 
   applyFilters() {
-    //check for special filters on numeric fields like = > <
-    this.filteredRows = this.rows.filter(
-      row => row.amount.toString().startsWith(this.amountFilter)
-    ).filter(row => row.unit.toString().startsWith(this.unitFilter))
+    this.filteredRows = this.rows.filter(row => row.amount.toString().startsWith(this.amountFilter))
+      .filter(row => row.unit.toString().startsWith(this.unitFilter))
       .filter(row => row.account.toString().startsWith(this.accountFilter))
       .filter(row => this.selectedPlatform !== "" ? this.selectedPlatform === row.platform : true)
       .filter(row => this.selectedDate !== "" ? this.selectedDate === row.date : true);
+  }
+
+  removeFilters() {
+    this.amountFilter = "";
+    this.accountFilter = "";
+    this.selectedPlatform = "";
+    this.selectedDate = "";
+    this.unitFilter = "";
   }
 
   onSelect({ selected }) {
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
     console.log(selected);
+  }
+
+  addRow(e) {
+    this.rows.push({ id: null, platform: "platform", unit: 0, account: 0, date: "12/12/2012", amount: 0 });
+    this.removeFilters();
+    this.applyFilters();
+    const dt = document.getElementsByTagName('datatable-body')[0];
+    setTimeout(() => {
+      dt.scrollTo(0, dt.scrollHeight);
+    }, 10);
   }
 
 }

@@ -1,6 +1,6 @@
 <div class="grid-container">
-  <div>
-    <div class="inline">
+  <div class="flex-container">
+    <div class="hide-on-mobile">
       <mat-form-field>
         <mat-label>Platform</mat-label>
         <mat-select (selectionChange)="applyPlatformFilter($event.value)">
@@ -10,17 +10,17 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="inline">
+    <div class="hide-on-mobile">
         <mat-form-field class="example-full-width">
           <input matInput placeholder="Unit" [(ngModel)]="unitFilter" (ngModelChange)="applyUnitFilter($event)">
       </mat-form-field>
       </div>
-      <div class="inline">
+      <div class="hide-on-mobile">
           <mat-form-field class="example-full-width">
               <input matInput placeholder="Account" [(ngModel)]="accountFilter" (ngModelChange)="applyAccountFilter($event)">
           </mat-form-field>
         </div>
-    <div class="inline">
+    <div class="hide-on-mobile">
         <mat-form-field>
           <mat-label>Date</mat-label>
           <mat-select (selectionChange)="applyDateFilter($event.value)">
@@ -30,9 +30,9 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="inline">
+      <div class="hide-on-mobile">
           <mat-form-field class="example-full-width">
-              <input matInput placeholder="Amount" [(ngModel)]="amountFilter" (ngModelChange)="applyAmountFilter($event)">
+              <input matInput name="amount" placeholder="Amount" [(ngModel)]="amountFilter" (ngModelChange)="applyAmountFilter($event)">
           </mat-form-field>
         </div>
   </div>
@@ -51,8 +51,7 @@
       [selectAllRowsOnPage]="false"
       [displayCheck]="displayCheck"
       (select)='onSelect($event)'
-      [scrollbarV]="true"
-      [scrollbarH]="false">
+      [scrollbarH]="true">
       <ngx-datatable-column
       [width]="30"
       [sortable]="false"
@@ -61,11 +60,6 @@
       [resizeable]="false"
       [checkboxable]="true">
     </ngx-datatable-column>
-    <ngx-datatable-column name="Id">
-        <ng-template ngx-datatable-cell-template let-value="value">
-          {{value}}
-        </ng-template>
-      </ngx-datatable-column>
       <ngx-datatable-column name="Platform">
         <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
           <span
@@ -156,6 +150,6 @@
   <div class="grid-controls">
       <button mat-raised-button color="primary">Refresh</button>
       <button mat-raised-button color="primary">Delete</button>
-      <button mat-raised-button color="primary">Add</button>
+      <button mat-raised-button color="primary" (click)="addRow($event)">Add</button>
   </div>
 </div>

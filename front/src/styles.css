@@ -1,11 +1,45 @@
 /* You can add global styles to this file, and also import other style files */
+
 @import '@swimlane/ngx-datatable/release/index.css';
 @import '@swimlane/ngx-datatable/release/themes/material.css';
 @import '@swimlane/ngx-datatable/release/assets/icons.css';
+html, body {
+    height: 100%;
+    box-sizing: border-box;
+}
 
-html, body { height: 100%; box-sizing: border-box;}
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 .datatable-header-cell-label {
     user-select: none;
+}
+
+.datatable-scroll {
+    display: inherit !important;
+}
+
+.datatable-body {
+    overflow-y: visible;
+    height: 60vh !important;
+}
+
+@media only screen and (max-width: 1250px) {
+    .hide-on-mobile {
+        width: 100px;
+    }
+}
+
+@media only screen and (max-width: 750px) {
+    .hide-on-mobile {
+        width: 70px;
+    }
+}
+
+@media only screen and (max-width: 560px) {
+    .hide-on-mobile {
+        display: none;
+    }
 }

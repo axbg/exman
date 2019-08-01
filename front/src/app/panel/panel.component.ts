@@ -12,4 +12,9 @@ export class PanelComponent implements OnInit {
   ngOnInit() {
   }
 
+  logout() {
+    //delete token
+    //refresh
+    console.log('yas');
+  }
 }

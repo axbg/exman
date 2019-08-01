@@ -6,21 +6,18 @@
     padding-top: 5vh;
 }
 
-.inline {
-    margin-left: 20px;
-    display: inline-block;
-}
-
-.inline:first-of-type {
-    margin-left: 0px;
-    float: left;
-}
-
-.inline:last-of-type {
-    float: right;
-}
-
 .grid-controls > * {
     margin: 10px;
     float: right;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-container > div {
+    margin: 10px;
 }
