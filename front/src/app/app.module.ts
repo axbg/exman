@@ -12,6 +12,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { UserManagementComponent } from './user-management/user-management.component';
+import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -28,7 +33,12 @@ import { UserManagementComponent } from './user-management/user-management.compo
     BrowserAnimationsModule,
     MatCardModule,
     MatIconModule,
-    HttpClientModule
+    HttpClientModule,
+    NgxDatatableModule,
+    MatSelectModule,
+    MatInputModule,
+    FormsModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

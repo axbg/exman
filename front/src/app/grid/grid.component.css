@@ -1,0 +1,26 @@
+
+.grid-container {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+    padding-top: 5vh;
+}
+
+.inline {
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.inline:first-of-type {
+    margin-left: 0px;
+    float: left;
+}
+
+.inline:last-of-type {
+    float: right;
+}
+
+.grid-controls > * {
+    margin: 10px;
+    float: right;
+}
