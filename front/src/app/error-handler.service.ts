@@ -9,8 +9,7 @@ export class ErrorHandlerService implements ErrorHandler{
   constructor(private toastr: ToastrService) { }
     
   handleError(error: any): void {
-    console.log("error thrown");
-    this.toastr.show("sal");
+    console.log(error);
   }
 
 }

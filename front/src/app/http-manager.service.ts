@@ -10,7 +10,8 @@ export class HttpManagerService {
   constructor(private httpClient: HttpClient) { }
 
   createHeaders(customHeaders?) {
-    return new HttpHeaders({ Authorization: window.localStorage.getItem("token"), ...customHeaders });
+    const token = window.localStorage.getItem("token") ? window.localStorage.getItem("token") : ""
+    return new HttpHeaders({ Authorization: token, ...customHeaders });
   }
 
   async getRequest(url: String) {
@@ -31,6 +32,7 @@ export class HttpManagerService {
   }
 
   async deleteRequest(url: String) {
-
+    return this.httpClient.delete(Constants.API_ENDPOINT + url, { headers: this.createHeaders() })
+    .toPromise();
   }
 }

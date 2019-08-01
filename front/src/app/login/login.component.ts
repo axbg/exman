@@ -44,8 +44,8 @@ export class LoginComponent implements OnInit {
 
       this.router.navigateByUrl("/menu");
     } catch (err) {
+      console.log(err);
       this.toastr.clear();
-      this.toastr.error(err.error.message);
     }
   }
 

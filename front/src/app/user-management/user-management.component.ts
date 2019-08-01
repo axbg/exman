@@ -38,22 +38,44 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
-  dispatchRegister(values) {
+  async dispatchRegister(values) {
     this.username = values.username;
     this.password = values.password;
+
+    try {
+      const result = await this.httpManager.postRequest("/user", { username: this.username, password: this.password, isAdmin: this.isAdmin });
+      this.users.push({ id: result["id"], username: result["username"] });
+      this.toastr.success("User " + result["username"] + " was created");
+      this.users = [...this.users];
+    } catch (err) {
+      this.toastr.error(err.error.message);
+    }
   }
 
   public hasError = (controlName: string, errorName: string) => {
     return this.form.controls[controlName].hasError(errorName);
   }
 
-  handleRemove(e) {
+  async handleRemove(e) {
     let target = e.target;
 
     if (e.target.type !== "submit") {
       target = e.target.parentNode;
     }
 
-    console.log(target.getAttribute("id"));
+    const row = target.getAttribute("row");
+    const id = target.getAttribute("id");
+
+    console.log(id);
+    console.log(row);
+
+    try {
+      const result = await this.httpManager.deleteRequest("/user/" + id);
+      this.toastr.clear();
+      this.toastr.success(result["message"]);
+      this.users = this.users.filter((user, index) => index.toString() !== row);
+    } catch (err) {
+      this.toastr.error(err.error.message);
+    }
   }
 }
