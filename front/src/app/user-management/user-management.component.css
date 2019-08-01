@@ -25,6 +25,11 @@ table {
     text-align: left;
 }
 
+.spinner {
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
 @media only screen and (max-width: 490px) {
     .app-panel {
         height: 80%;

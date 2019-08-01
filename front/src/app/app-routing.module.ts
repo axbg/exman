@@ -4,12 +4,14 @@ import { PanelComponent } from './panel/panel.component';
 import { GridComponent } from './grid/grid.component';
 import { LoginComponent } from './login/login.component';
 import { UserManagementComponent } from './user-management/user-management.component';
+import { AuthGuardService } from './auth-guard.service';
+import { AdminGuardService } from './admin-guard.service';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
-  { path: 'menu', component: PanelComponent },
-  { path: 'grid', component: GridComponent },
-  { path: 'users', component: UserManagementComponent }
+  { path: 'menu', component: PanelComponent, canActivate: [AuthGuardService] },
+  { path: 'grid', component: GridComponent, canActivate: [AuthGuardService] },
+  { path: 'users', component: UserManagementComponent, canActivate: [AdminGuardService] }
 ];
 
 @NgModule({

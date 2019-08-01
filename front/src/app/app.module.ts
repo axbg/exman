@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,7 +19,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-
+import { ErrorHandlerService } from './error-handler.service';
+import { ToastrModule } from 'ngx-toastr';
+import { LoadingBarModule } from '@ngx-loading-bar/core';
+import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
+import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -44,9 +49,19 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatButtonModule,
     ReactiveFormsModule,
     MatTableModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    ToastrModule.forRoot(),
+    LoadingBarModule, 
+    LoadingBarHttpClientModule,
+    LoadingBarRouterModule,
+    MatProgressSpinnerModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: ErrorHandler, 
+      useClass: ErrorHandlerService
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

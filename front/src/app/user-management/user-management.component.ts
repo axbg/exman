@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpManagerService } from '../http-manager.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-user-management',
@@ -15,75 +17,30 @@ export class UserManagementComponent implements OnInit {
   isAdmin: boolean = false;
   displayedColumns: string[] = ['remove', 'username'];
 
-  users: any[] = [{
-    id: 1,
-    username: "alexb"
-  },
-  {
-    id: 2,
-    username: 'abcdefg'
-  },
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  }
-  ,
-  {
-    id: 2,
-    username: 'abcdefg'
-  },
-  {
-    id: 2,
-    username: 'abcdefg'
-  },
-  {
-    id: 2,
-    username: 'abcdefg'
-  },
-  {
-    id: 2,
-    username: 'abcdefg'
-  }];
+  users: any = [];
+  showSpinner: boolean = true;
 
-  constructor(private router: Router, private formBuilder: FormBuilder) {
+  constructor(private router: Router, private formBuilder: FormBuilder,
+    private httpManager: HttpManagerService, private toastr: ToastrService) {
     this.form = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required])
     })
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    try {
+      const result = await this.httpManager.getRequest("/user");
+      this.users = result;
+      this.showSpinner = false;
+    } catch (err) {
+      this.toastr.error(err.error.message);
+    }
   }
 
   dispatchRegister(values) {
     this.username = values.username;
     this.password = values.password;
-    console.log(this.isAdmin);
   }
 
   public hasError = (controlName: string, errorName: string) => {

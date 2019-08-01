@@ -26,6 +26,11 @@ body {
     height: 60vh !important;
 }
 
+.spinner {
+    margin: 0 auto;
+    margin-top: 100px;
+}
+
 @media only screen and (max-width: 1250px) {
     .hide-on-mobile {
         width: 100px;

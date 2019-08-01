@@ -1,3 +1,4 @@
+<ngx-loading-bar></ngx-loading-bar>
 <div class="app-panel">
   <mat-card class="app-card">
     <div class="menu-button">
@@ -10,10 +11,10 @@
       <div class="menu-button">
         <i class="material-icons big-icon">cloud_upload</i>
         <p class="icon-label">Upload an Excel document</p>
-        <input type="file">
+        <input type="file"  (change)="handleUpload($event.target.files)"> 
       </div>
     </label>
-    <div class="menu-button">
+    <div class="menu-button" *ngIf="showUserManagement">
       <a class="nav-link" routerLink="/users">
         <i class="material-icons big-icon">people</i>
         <p class="icon-label">Users management</p>

@@ -1,3 +1,4 @@
+<ngx-loading-bar></ngx-loading-bar>
 <div class="app-panel">
   <mat-card class="app-card">
     <h3>Add a new user</h3>
@@ -20,8 +21,8 @@
       Is Admin?
     </mat-slide-toggle>
     <div class="table-container">
-      <table mat-table [dataSource]="users">
-
+      <mat-spinner class="spinner" *ngIf="showSpinner"></mat-spinner>
+      <table mat-table [dataSource]="users" *ngIf="!showSpinner">
         <!-- Name Column -->
         <ng-container matColumnDef="username">
           <th mat-header-cell *matHeaderCellDef> Username </th>

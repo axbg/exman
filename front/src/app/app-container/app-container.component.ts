@@ -11,7 +11,7 @@ export class AppContainerComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    console.log('loading');
+    
   }
 
 }
