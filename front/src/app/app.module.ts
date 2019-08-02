@@ -25,6 +25,7 @@ import { LoadingBarModule } from '@ngx-loading-bar/core';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {HotkeyModule} from 'angular2-hotkeys';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     LoadingBarModule, 
     LoadingBarHttpClientModule,
     LoadingBarRouterModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    HotkeyModule.forRoot()
   ],
   providers: [
     {

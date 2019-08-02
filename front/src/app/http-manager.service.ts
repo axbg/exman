@@ -27,12 +27,18 @@ export class HttpManagerService {
       .toPromise();
   }
 
-  async putRequest(url: String, params: Object) {
-
+  async putRequest(url: String, params) {
+    return this.httpClient.put(Constants.API_ENDPOINT + url, params, { headers: this.createHeaders({ 'enctype': 'multipart/form-data' }) })
+      .toPromise();
   }
 
   async deleteRequest(url: String) {
     return this.httpClient.delete(Constants.API_ENDPOINT + url, { headers: this.createHeaders() })
-    .toPromise();
+      .toPromise();
+  }
+
+  async deleteRows(url: String, params) {
+    return this.httpClient.post(Constants.API_ENDPOINT + url, params, { headers: this.createHeaders({ 'enctype': 'multipart/form-data' }) })
+      .toPromise();
   }
 }

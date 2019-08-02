@@ -31,15 +31,35 @@ body {
     margin-top: 100px;
 }
 
+.ng-star-inserted {
+    width: 100%;
+}
+
+.datatable-body-cell {
+    padding: 0px !important;
+}
+
+.datatable-checkbox {
+    padding-left: 5px;
+}
+
 @media only screen and (max-width: 1250px) {
     .hide-on-mobile {
-        width: 100px;
+        width: 90px;
+    }
+
+    .mat-form-field-infix {
+        width: 100px !important;
     }
 }
 
 @media only screen and (max-width: 750px) {
     .hide-on-mobile {
         width: 70px;
+    }
+
+    .mat-form-field-infix {
+        width: 70px !important;
     }
 }
 

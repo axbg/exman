@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from 'selenium-webdriver/http';
 import { HttpManagerService } from '../http-manager.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -44,8 +43,8 @@ export class LoginComponent implements OnInit {
 
       this.router.navigateByUrl("/menu");
     } catch (err) {
-      console.log(err);
       this.toastr.clear();
+      this.toastr.error(err.error.message);
     }
   }
 

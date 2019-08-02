@@ -1,5 +1,6 @@
+<ngx-loading-bar></ngx-loading-bar>
 <div class="grid-container">
-  <div class="flex-container">
+  <div class="flex-container" *ngIf="!showSpinner">
     <div class="hide-on-mobile">
       <mat-form-field>
         <mat-label>Platform</mat-label>
@@ -36,15 +37,16 @@
           </mat-form-field>
         </div>
   </div>
-  <div>
+  <mat-spinner class="spinner" *ngIf="showSpinner"></mat-spinner>
+  <div *ngIf="!showSpinner">
       <ngx-datatable
       #mydatatable
       class="material"
-      style="height: 70vh;"
+      style="height: 70vh;transform:rotateX(0dex);"
       [headerHeight]="50"
       [columnMode]="'force'"
       [footerHeight]="50"
-      [rowHeight]="50"
+      [rowHeight]="auto"
       [rows]="filteredRows"
       [selected]="selected"
       [selectionType]="'checkbox'"
@@ -62,16 +64,9 @@
     </ngx-datatable-column>
       <ngx-datatable-column name="Platform">
         <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
-          <span
-            title="Double click to edit"
-            (dblclick)="editing[rowIndex + '-platform'] = true"
-            *ngIf="!editing[rowIndex + '-platform']">
-            {{value}}
-          </span>
           <input
             autofocus
             (blur)="updateValue($event, 'platform', rowIndex)"
-            *ngIf="editing[rowIndex+ '-platform']"
             type="text"
             [value]="value"
           />
@@ -79,16 +74,9 @@
       </ngx-datatable-column>
       <ngx-datatable-column name="Unit">
         <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
-           <span
-            title="Double click to edit"
-            (dblclick)="editing[rowIndex + '-unit'] = true"
-            *ngIf="!editing[rowIndex + '-unit']">
-            {{value}}
-          </span>
           <input
             autofocus
             (blur)="updateValue($event, 'unit', rowIndex)"
-            *ngIf="editing[rowIndex+ '-unit']"
             type="text"
             [value]="value"
           />
@@ -96,16 +84,9 @@
       </ngx-datatable-column>
       <ngx-datatable-column name="Account">
           <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
-             <span
-              title="Double click to edit"
-              (dblclick)="editing[rowIndex + '-account'] = true"
-              *ngIf="!editing[rowIndex + '-account']">
-              {{value}}
-            </span>
             <input
             autofocus
             (blur)="updateValue($event, 'account', rowIndex)"
-            *ngIf="editing[rowIndex+ '-account']"
             type="text"
             [value]="value"
           />
@@ -113,16 +94,9 @@
         </ngx-datatable-column>
         <ngx-datatable-column name="Date">
             <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
-               <span
-                title="Double click to edit"
-                (dblclick)="editing[rowIndex + '-date'] = true"
-                *ngIf="!editing[rowIndex + '-date']">
-                {{value}}
-              </span>
               <input
               autofocus
               (blur)="updateValue($event, 'date', rowIndex)"
-              *ngIf="editing[rowIndex+ '-date']"
               type="text"
               [value]="value"
             />
@@ -130,16 +104,9 @@
           </ngx-datatable-column>
           <ngx-datatable-column name="Amount">
               <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
-                 <span
-                  title="Double click to edit"
-                  (dblclick)="editing[rowIndex + '-amount'] = true"
-                  *ngIf="!editing[rowIndex + '-amount']">
-                  {{value}}
-                </span>
                 <input
                 autofocus
                 (blur)="updateValue($event, 'amount', rowIndex)"
-                *ngIf="editing[rowIndex+ '-amount']"
                 type="text"
                 [value]="value"
               />
@@ -147,9 +114,10 @@
             </ngx-datatable-column>
     </ngx-datatable>
   </div>
-  <div class="grid-controls">
-      <button mat-raised-button color="primary">Refresh</button>
-      <button mat-raised-button color="primary">Delete</button>
+  <div class="grid-controls" [hidden]='showSpinner'>
+      <button mat-raised-button color="primary" (click)="refresh()">Refresh</button>
+      <button mat-raised-button color="primary" (click)="delete()">Delete</button>
+      <button mat-raised-button [color]="!hasUpdates ? 'primary' : 'warm'" (click)="save()">Save</button>
       <button mat-raised-button color="primary" (click)="addRow($event)">Add</button>
   </div>
 </div>

@@ -11,11 +11,19 @@
     float: right;
 }
 
+.prim {
+    color: "primary"
+}
+
+.sec {
+    color: "secondary"
+}
+
 .flex-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 }
 
 .flex-container > div {

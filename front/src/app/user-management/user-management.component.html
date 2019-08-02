@@ -5,17 +5,11 @@
     <form [formGroup]="form" (ngSubmit)="dispatchRegister(form.value)">
       <mat-form-field>
         <input matInput type="text" placeholder="Username" formControlName="username">
-        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="form.controls.username.setValue('')">
-          <mat-icon>close</mat-icon>
-        </button>
         <mat-error *ngIf="hasError('username', 'required')">Username is required</mat-error>
       </mat-form-field>
       <br>
       <mat-form-field>
         <input matInput type="password" placeholder="Password" formControlName="password">
-        <button mat-button matSuffix mat-icon-button aria-label="Clear" (click)="form.controls.password.setValue('')">
-          <mat-icon>close</mat-icon>
-        </button>
         <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
       </mat-form-field>
       <br>

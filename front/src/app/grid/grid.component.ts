@@ -1,4 +1,7 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpManagerService } from '../http-manager.service';
+import { ToastrService } from 'ngx-toastr';
+import { HotkeysService, Hotkey } from 'angular2-hotkeys';
 
 @Component({
   selector: 'app-grid',
@@ -10,6 +13,7 @@ export class GridComponent implements OnInit {
   editing = {};
   selected = [];
   updated = [];
+  hasUpdates: boolean = false;
 
   platformDropdown = [];
   selectedPlatform = "";
@@ -19,67 +23,39 @@ export class GridComponent implements OnInit {
   accountFilter = "";
   amountFilter = "";
 
-  rows = [
-    {
-      "id": 1,
-      "platform": "MC",
-      "unit": 8523,
-      "account": 98980989,
-      "date": "21/12/2012",
-      "amount": 23232.25
-    },
-    {
-      "id": 2,
-      "platform": "Platform",
-      "unit": 8523,
-      "account": 98980989,
-      "date": "21/12/2012",
-      "amount": 23232.25
-    },
-    {
-      "id": 3,
-      "platform": "Platform",
-      "unit": 8523,
-      "account": 98980989,
-      "date": "21/12/2012",
-      "amount": 1
-    },
-    {
-      "id": 4,
-      "platform": "Platform",
-      "unit": 8523,
-      "account": 98980989,
-      "date": "21/12/2013",
-      "amount": 23232.25
-    },
-
-  ];
+  rows: any[] = [];
   filteredRows = this.rows;
+  showSpinner: boolean = true;
 
-  constructor(private el: ElementRef) {
+  constructor(private httpManager: HttpManagerService, private toastr: ToastrService,
+    private _hotkeysService: HotkeysService) {
+      this._hotkeysService.add(new Hotkey('ctrl+s', (event: KeyboardEvent): boolean => {
+        this.save();
+        return false; // Prevent bubbling
+    }));
 
+      this._hotkeysService.add(new Hotkey('ctrl+d', (event: KeyboardEvent): boolean => {
+        this.addRow();
+        return false; // Prevent bubbling
+    }));
   }
 
-  ngOnInit(): void {
-    this.filterPlatform();
-    this.filterDate();
+  async ngOnInit() {
+    this.loadData();
   }
 
-  updateValue(event, cell, rowIndex) {
-    this.editing[rowIndex + '-' + cell] = false;
-
-    this.filteredRows[rowIndex][cell] = event.target.value;
-    this.filteredRows = [...this.filteredRows];
-
-    this.updated.push(this.filteredRows[rowIndex]);
-
-    if (cell === "platform") {
+  async loadData() {
+    try {
+      const result = await this.httpManager.getRequest("/documents");
+      this.rows = <[]>result;
       this.filterPlatform();
-    } else if (cell === "date") {
       this.filterDate();
+      this.filteredRows = this.rows;
+      this.showSpinner = false;
+    } catch (err) {
+      this.toastr.error(err.error.message);
     }
   }
-
 
   filterPlatform() {
     this.platformDropdown = Array.from(new Set(this.rows.map(row => row.platform)));
@@ -89,11 +65,6 @@ export class GridComponent implements OnInit {
   filterDate() {
     this.dateDropdown = Array.from(new Set(this.rows.map(row => row.date)));
     this.dateDropdown.splice(0, 0, "");
-  }
-
-  //combine all filters and use a switch based on event target name
-  applyFilter(e) {
-
   }
 
   applyAmountFilter(e) {
@@ -122,11 +93,15 @@ export class GridComponent implements OnInit {
   }
 
   applyFilters() {
-    this.filteredRows = this.rows.filter(row => row.amount.toString().startsWith(this.amountFilter))
-      .filter(row => row.unit.toString().startsWith(this.unitFilter))
-      .filter(row => row.account.toString().startsWith(this.accountFilter))
-      .filter(row => this.selectedPlatform !== "" ? this.selectedPlatform === row.platform : true)
-      .filter(row => this.selectedDate !== "" ? this.selectedDate === row.date : true);
+    if (this.amountFilter === "" && this.amountFilter && this.amountFilter && this.amountFilter && this.amountFilter) {
+      this.filteredRows = this.rows;
+    } else {
+      this.filteredRows = this.rows.filter(row => row.amount.toString().startsWith(this.amountFilter))
+        .filter(row => row.unit.toString().startsWith(this.unitFilter))
+        .filter(row => row.account.toString().startsWith(this.accountFilter))
+        .filter(row => this.selectedPlatform !== "" ? this.selectedPlatform === row.platform : true)
+        .filter(row => this.selectedDate !== "" ? this.selectedDate === row.date : true);
+    }
   }
 
   removeFilters() {
@@ -140,17 +115,78 @@ export class GridComponent implements OnInit {
   onSelect({ selected }) {
     this.selected.splice(0, this.selected.length);
     this.selected.push(...selected);
-    console.log(selected);
   }
 
-  addRow(e) {
-    this.rows.push({ id: null, platform: "platform", unit: 0, account: 0, date: "12/12/2012", amount: 0 });
-    this.removeFilters();
-    this.applyFilters();
-    const dt = document.getElementsByTagName('datatable-body')[0];
-    setTimeout(() => {
-      dt.scrollTo(0, dt.scrollHeight);
-    }, 10);
+  async addRow() {
+    try {
+      const result = await this.httpManager.postRequest("/documents/row", {});
+      this.rows.push(result);
+      this.removeFilters();
+      this.applyFilters();
+      const dt = document.getElementsByTagName('datatable-body')[0];
+      setTimeout(() => {
+        dt.scrollTo(0, dt.scrollHeight);
+        this.toastr.success("Row added");
+      }, 10);
+    } catch (err) {
+      this.toastr.error("Insert failed");
+    }
+  }
+
+  async save() {
+    if(this.updated.length !== 0) {
+      try {
+        await this.httpManager.putRequest("/documents", this.updated);
+        this.toastr.success("Rows updated");
+        this.updated = [];
+        this.hasUpdates = false;
+      } catch (err) {
+        this.toastr.error("Rows were not updated");
+      }
+    }
+  }
+
+  async delete() {
+    if (this.selected.length !== 0 && confirm("Are you sure you want to delete?")) {
+      try {
+        const selectedIds = this.selected.map(select => select.id);
+        await this.httpManager.deleteRows("/documents/delete/rows", { ...selectedIds });
+        this.rows = this.rows.filter(row => !selectedIds.includes(row.id));
+        this.selected = [];
+        this.applyFilters();
+        this.toastr.success("Rows deleted");
+      } catch (err) {
+        this.toastr.error(err.error.message);
+      }
+    }
+  }
+
+  updateValue(event, cell, rowIndex) {
+    this.editing[rowIndex + '-' + cell] = false;
+
+    this.filteredRows[rowIndex][cell] = event.target.value;
+    this.filteredRows = [...this.filteredRows];
+
+    let existingRow = this.updated.find(element => element.id === this.filteredRows[rowIndex]["id"]);
+
+    if (existingRow) {
+      this.updated[this.updated.indexOf(existingRow)] = this.filteredRows[rowIndex];
+    } else {
+      this.updated.push(this.filteredRows[rowIndex]);
+    }
+
+    if (cell === "platform") {
+      this.filterPlatform();
+    } else if (cell === "date") {
+      this.filterDate();
+    }
+
+    this.hasUpdates = true;
+  }
+
+  refresh() {
+    this.showSpinner = true;
+    this.loadData();
   }
 
 }

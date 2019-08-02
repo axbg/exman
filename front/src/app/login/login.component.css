@@ -1,6 +1,6 @@
 .app-panel {
     margin: 0 auto;
-    height: 60%;
+    height: 50%;
     width: 50%;
     padding-top: 15vh;
 }
@@ -30,10 +30,10 @@ form {
 @media only screen and (max-width: 490px) {
     .app-panel {
         height: 80%;
-        width: 90%;
+        width: 100%;
         padding-top: 10vh;
     }
     form {
-        width: 90%;
+        width: 100%;
     }
 }

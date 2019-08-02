@@ -47,6 +47,7 @@ export class UserManagementComponent implements OnInit {
       this.users.push({ id: result["id"], username: result["username"] });
       this.toastr.success("User " + result["username"] + " was created");
       this.users = [...this.users];
+      this.form.reset();
     } catch (err) {
       this.toastr.error(err.error.message);
     }
