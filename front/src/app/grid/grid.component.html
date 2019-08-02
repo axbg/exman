@@ -1,0 +1,123 @@
+<ngx-loading-bar></ngx-loading-bar>
+<div class="grid-container">
+  <div class="flex-container" *ngIf="!showSpinner">
+    <div class="hide-on-mobile">
+      <mat-form-field>
+        <mat-label>Platform</mat-label>
+        <mat-select (selectionChange)="applyPlatformFilter($event.value)">
+          <mat-option *ngFor="let platform of platformDropdown" [value]="platform">
+            {{platform}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="hide-on-mobile">
+        <mat-form-field class="example-full-width">
+          <input matInput placeholder="Unit" [(ngModel)]="unitFilter" (ngModelChange)="applyUnitFilter($event)">
+      </mat-form-field>
+      </div>
+      <div class="hide-on-mobile">
+          <mat-form-field class="example-full-width">
+              <input matInput placeholder="Account" [(ngModel)]="accountFilter" (ngModelChange)="applyAccountFilter($event)">
+          </mat-form-field>
+        </div>
+    <div class="hide-on-mobile">
+        <mat-form-field>
+          <mat-label>Date</mat-label>
+          <mat-select (selectionChange)="applyDateFilter($event.value)">
+            <mat-option *ngFor="let date of dateDropdown" [value]="date">
+              {{date}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="hide-on-mobile">
+          <mat-form-field class="example-full-width">
+              <input matInput name="amount" placeholder="Amount" [(ngModel)]="amountFilter" (ngModelChange)="applyAmountFilter($event)">
+          </mat-form-field>
+        </div>
+  </div>
+  <mat-spinner class="spinner" *ngIf="showSpinner"></mat-spinner>
+  <div *ngIf="!showSpinner">
+      <ngx-datatable
+      #mydatatable
+      class="material"
+      style="height: 70vh;transform:rotateX(0dex);"
+      [headerHeight]="50"
+      [columnMode]="'force'"
+      [footerHeight]="50"
+      [rowHeight]="auto"
+      [rows]="filteredRows"
+      [selected]="selected"
+      [selectionType]="'checkbox'"
+      [selectAllRowsOnPage]="false"
+      [displayCheck]="displayCheck"
+      (select)='onSelect($event)'
+      [scrollbarH]="true">
+      <ngx-datatable-column
+      [width]="30"
+      [sortable]="false"
+      [canAutoResize]="false"
+      [draggable]="false"
+      [resizeable]="false"
+      [checkboxable]="true">
+    </ngx-datatable-column>
+      <ngx-datatable-column name="Platform">
+        <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row">
+          <input
+            autofocus
+            (blur)="updateValue($event, 'platform', rowIndex)"
+            type="text"
+            [value]="value"
+          />
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Unit">
+        <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+          <input
+            autofocus
+            (blur)="updateValue($event, 'unit', rowIndex)"
+            type="text"
+            [value]="value"
+          />
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Account">
+          <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+            <input
+            autofocus
+            (blur)="updateValue($event, 'account', rowIndex)"
+            type="text"
+            [value]="value"
+          />
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Date">
+            <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+              <input
+              autofocus
+              (blur)="updateValue($event, 'date', rowIndex)"
+              type="text"
+              [value]="value"
+            />
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Amount">
+              <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-row="row" let-value="value">
+                <input
+                autofocus
+                (blur)="updateValue($event, 'amount', rowIndex)"
+                type="text"
+                [value]="value"
+              />
+              </ng-template>
+            </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+  <div class="grid-controls" [hidden]='showSpinner'>
+      <button mat-raised-button color="primary" (click)="refresh()">Refresh</button>
+      <button mat-raised-button color="primary" (click)="delete()">Delete</button>
+      <button mat-raised-button [color]="!hasUpdates ? 'primary' : 'warm'" (click)="save()">Save</button>
+      <button mat-raised-button color="primary" (click)="addRow($event)">Add</button>
+  </div>
+</div>

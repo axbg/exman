@@ -1,0 +1,31 @@
+
+.grid-container {
+    text-align: center;
+    margin: 0 auto;
+    width: 80%;
+    padding-top: 5vh;
+}
+
+.grid-controls > * {
+    margin: 10px;
+    float: right;
+}
+
+.prim {
+    color: "primary"
+}
+
+.sec {
+    color: "secondary"
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.flex-container > div {
+    margin: 10px;
+}

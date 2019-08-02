@@ -1,0 +1,39 @@
+.app-panel {
+    margin: 0 auto;
+    height: 40%;
+    width: 50%;
+    padding-top: 15vh;
+}
+
+.app-card {
+    height: 100%;
+    text-align: center;
+}
+
+form {
+    width: 50%;
+    margin: 0 auto;
+    padding-top: 5vh;
+}
+
+@media only screen and (max-width: 755px) {
+    .app-panel {
+        height: 70%;
+        padding-top: 10vh;
+    }
+    
+    form {
+        width: 80%;
+    }
+}
+
+@media only screen and (max-width: 490px) {
+    .app-panel {
+        height: 80%;
+        width: 100%;
+        padding-top: 10vh;
+    }
+    form {
+        width: 100%;
+    }
+}

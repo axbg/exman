@@ -1,0 +1,20 @@
+<ngx-loading-bar></ngx-loading-bar>
+<div class="app-panel">
+  <mat-card class="app-card">
+    <h1>POC_1</h1>
+    <form [formGroup]="form" (ngSubmit)="dispatchLogin(form.value)">
+      <mat-form-field>
+        <input matInput type="text" placeholder="Username" formControlName="username">
+        <mat-error *ngIf="hasError('username', 'required')">Username is required</mat-error>
+      </mat-form-field>
+      <br>
+      <mat-form-field>
+        <input matInput type="password" placeholder="Password" formControlName="password">
+        <mat-error *ngIf="hasError('password', 'required')">Password is required</mat-error>
+      </mat-form-field>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" [disabled]="!form.valid">Login</button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</div>
