@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public List<User> getUsers(User user) {
         checkIfAdmin(user);
         return ((List<User>) userRepository.findAll()).stream()
-                .filter(u -> u.getId() != user.getId())
+                .filter(u -> !u.getId().equals(user.getId()))
                 .collect(Collectors.toList());
     }
 

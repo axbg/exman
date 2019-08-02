@@ -1,5 +1,6 @@
 package com.web.poc1.controller;
 
+import com.google.gson.JsonArray;
 import com.web.poc1.exception.CustomException;
 import com.web.poc1.model.ExcelRow;
 import com.web.poc1.service.DocumentService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -30,14 +32,20 @@ public class DocumentController {
         return new ResponseEntity<>(documentService.getRows(), HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<ExcelRow> updateRow(@RequestBody ExcelRow row) {
-        return new ResponseEntity<>(documentService.updateRow(row), HttpStatus.OK);
+    @PostMapping(value="/row")
+    public ResponseEntity<ExcelRow> createRow() {
+        return new ResponseEntity<>(documentService.createRow(), HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity deleteRow(@PathVariable Long id) {
-        documentService.deleteRow(id);
+    @PutMapping
+    public ResponseEntity updateRows(@RequestBody String rows) {
+        this.documentService.updateRows(rows);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/delete/rows")
+    public ResponseEntity deleteRows(@RequestBody Map<Integer, String> rows) {
+        this.documentService.deleteRows(rows);
         return new ResponseEntity(HttpStatus.OK);
     }
 

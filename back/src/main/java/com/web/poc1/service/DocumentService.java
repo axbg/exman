@@ -5,13 +5,16 @@ import com.web.poc1.model.ExcelRow;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DocumentService {
     int uploadDocument(MultipartFile document) throws CustomException;
 
     List<ExcelRow> getRows();
 
-    ExcelRow updateRow(ExcelRow row);
+    ExcelRow createRow();
 
-    void deleteRow(Long id);
+    List<ExcelRow> updateRows(String rows);
+
+    void deleteRows(Map<Integer, String> rows);
 }

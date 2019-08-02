@@ -5,21 +5,29 @@ import com.web.poc1.exception.CustomException;
 import com.web.poc1.model.ExcelRow;
 import com.web.poc1.util.AllowedFileTypes;
 import lombok.AllArgsConstructor;
+
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -44,15 +52,29 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public ExcelRow updateRow(ExcelRow row) throws CustomException {
-        row.hasAnyNull();
-        return rowRepository.save(row);
+    public ExcelRow createRow() throws CustomException {
+        ExcelRow newRow = new ExcelRow("new", 0, 0, new Date(System.currentTimeMillis()), 0.0);
+        return rowRepository.save(newRow);
     }
 
     @Override
-    public void deleteRow(Long id) {
+    public List<ExcelRow> updateRows(String rows) {
+        List<ExcelRow> excelRows = parseJsonArray(rows);
+        this.rowRepository.saveAll(excelRows);
+        return new ArrayList<>();
+    }
+
+    @Override
+    @Transactional
+    public void deleteRows(Map<Integer, String> rows) {
         try {
-            rowRepository.deleteById(id);
+
+            List<Long> ids = new ArrayList();
+            for (Map.Entry<Integer, String> e : rows.entrySet()) {
+              ids.add(Long.parseLong(e.getValue()));
+            }
+
+            rowRepository.deleteByIdIn(ids);
         } catch (EmptyResultDataAccessException exception) {
 
         }
@@ -114,6 +136,44 @@ public class DocumentServiceImpl implements DocumentService {
                 throw new CustomException("Empty cell: row " + row.getRowNum() + ", cell " + (index + 1), HttpStatus.BAD_REQUEST);
             }
         }
+    }
+
+    private List<ExcelRow> parseJsonArray(String json) {
+        List<ExcelRow> result = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for(int index = 0; index < jsonArray.length(); index++) {
+                result.add(parseJson(jsonArray.getJSONObject(index)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    private ExcelRow parseJson(JSONObject json) {
+        ExcelRow excelRow = new ExcelRow();
+        try {
+            excelRow.setId(json.getLong("id"));
+            excelRow.setPlatform(json.getString("platform"));
+            excelRow.setUnit(json.getInt("unit"));
+            excelRow.setAccount(json.getInt("account"));
+            excelRow.setAmount(json.getDouble("amount"));
+
+            Date date;
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            java.util.Date parsedDate = simpleDateFormat.parse(json.getString("date"));
+            date = new Date(parsedDate.getTime());
+
+            excelRow.setDate(date);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return excelRow;
     }
 
 }

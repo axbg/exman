@@ -31,7 +31,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping
     public ResponseEntity<User> register(@AuthenticationPrincipal final User currentUser, @RequestParam("username") final String username,
                                          @RequestParam("password") final String password,
                                          @RequestParam("isAdmin") final boolean isAdmin)
