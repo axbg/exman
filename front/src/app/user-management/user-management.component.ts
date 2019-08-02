@@ -67,9 +67,6 @@ export class UserManagementComponent implements OnInit {
     const row = target.getAttribute("row");
     const id = target.getAttribute("id");
 
-    console.log(id);
-    console.log(row);
-
     try {
       const result = await this.httpManager.deleteRequest("/user/" + id);
       this.toastr.clear();
