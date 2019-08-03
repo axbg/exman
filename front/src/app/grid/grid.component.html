@@ -4,7 +4,7 @@
     <div class="hide-on-mobile">
       <mat-form-field>
         <mat-label>Platform</mat-label>
-        <mat-select (selectionChange)="applyPlatformFilter($event.value)">
+        <mat-select [(ngModel)]="selectedPlatform" (selectionChange)="applyPlatformFilter($event.value)">
           <mat-option *ngFor="let platform of platformDropdown" [value]="platform">
             {{platform}}
           </mat-option>
@@ -24,7 +24,7 @@
     <div class="hide-on-mobile">
         <mat-form-field>
           <mat-label>Date</mat-label>
-          <mat-select (selectionChange)="applyDateFilter($event.value)">
+          <mat-select [(ngModel)]="selectedDate" (selectionChange)="applyDateFilter($event.value)">
             <mat-option *ngFor="let date of dateDropdown" [value]="date">
               {{date}}
             </mat-option>
@@ -45,7 +45,7 @@
       style="height: 70vh;transform:rotateX(0dex);"
       [headerHeight]="50"
       [columnMode]="'force'"
-      [footerHeight]="50"
+      [footerHeight]="30"
       [rowHeight]="auto"
       [rows]="filteredRows"
       [selected]="selected"
@@ -116,6 +116,7 @@
   </div>
   <div class="grid-controls" [hidden]='showSpinner'>
       <button mat-raised-button color="primary" (click)="refresh()">Refresh</button>
+      <button mat-raised-button color="primary" (click)="removeFilters(); applyFilters();">Remove Filters</button>
       <button mat-raised-button color="primary" (click)="delete()">Delete</button>
       <button mat-raised-button [color]="!hasUpdates ? 'primary' : 'warm'" (click)="save()">Save</button>
       <button mat-raised-button color="primary" (click)="addRow($event)">Add</button>
