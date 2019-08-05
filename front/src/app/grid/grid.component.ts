@@ -186,6 +186,7 @@ export class GridComponent implements OnInit {
 
   refresh() {
     this.showSpinner = true;
+    this.removeFilters();
     this.loadData();
   }
 

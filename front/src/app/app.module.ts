@@ -24,8 +24,10 @@ import { ToastrModule } from 'ngx-toastr';
 import { LoadingBarModule } from '@ngx-loading-bar/core';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {HotkeyModule} from 'angular2-hotkeys';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { HotkeyModule } from 'angular2-hotkeys';
+import { MatRippleModule } from '@angular/material/core';
+
 
 @NgModule({
   declarations: [
@@ -52,15 +54,16 @@ import {HotkeyModule} from 'angular2-hotkeys';
     MatTableModule,
     MatSlideToggleModule,
     ToastrModule.forRoot(),
-    LoadingBarModule, 
+    LoadingBarModule,
     LoadingBarHttpClientModule,
     LoadingBarRouterModule,
     MatProgressSpinnerModule,
-    HotkeyModule.forRoot()
+    HotkeyModule.forRoot(),
+    MatRippleModule
   ],
   providers: [
     {
-      provide: ErrorHandler, 
+      provide: ErrorHandler,
       useClass: ErrorHandlerService
     }
   ],
