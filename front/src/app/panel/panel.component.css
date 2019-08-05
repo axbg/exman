@@ -1,6 +1,6 @@
 .app-panel {
     margin: 0 auto;
-    height: 60%;
+    height: 65%;
     width: 50%;
     padding-top: 15vh;
 }
@@ -10,21 +10,26 @@
     text-align: center;
 }
 
+.hover-container :hover {
+    background-color: #F5F5F5;
+}
+
 .menu-button {
     margin: 0 auto;
     margin-top: 2vh !important;
     cursor: pointer;
     font-size: 1.1em;
-    border: 1px solid black;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     width: 40%;
     user-select: none;
+    height: 12vh;
+    padding-top: 2vh;
 }
 
 .nav-link {
     color: inherit;
     display: inline-block;
     width: 100%;
-    padding-top: 2.5vh;
     text-decoration: none;
 }
 
@@ -45,11 +50,9 @@ input[type=file] {
         height: 70%;
         padding-top: 10vh;
     }
-
     .menu-button {
         width: 60%;
     }
-
     .nav-link {
         padding-top: 2vh;
     }
