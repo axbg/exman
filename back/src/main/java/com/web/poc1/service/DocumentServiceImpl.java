@@ -16,10 +16,17 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.Date;
@@ -71,7 +78,7 @@ public class DocumentServiceImpl implements DocumentService {
 
             List<Long> ids = new ArrayList();
             for (Map.Entry<Integer, String> e : rows.entrySet()) {
-              ids.add(Long.parseLong(e.getValue()));
+                ids.add(Long.parseLong(e.getValue()));
             }
 
             rowRepository.deleteByIdIn(ids);
@@ -142,7 +149,7 @@ public class DocumentServiceImpl implements DocumentService {
         List<ExcelRow> result = new ArrayList<>();
         try {
             JSONArray jsonArray = new JSONArray(json);
-            for(int index = 0; index < jsonArray.length(); index++) {
+            for (int index = 0; index < jsonArray.length(); index++) {
                 result.add(parseJson(jsonArray.getJSONObject(index)));
             }
         } catch (JSONException e) {
@@ -174,6 +181,25 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         return excelRow;
+    }
+
+    @Override
+    public List<ExcelRow> findByDynamicSelector(String platform, Pageable pageable) {
+        Page page = rowRepository.findAll(new Specification<ExcelRow>() {
+            @Override
+            public Predicate toPredicate(Root<ExcelRow> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                if (platform != null) {
+                    predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("platform"), platform)));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            }
+        }, pageable);
+
+        page.getTotalElements();
+        page.getTotalPages();
+
+        return page.getContent();
     }
 
 }

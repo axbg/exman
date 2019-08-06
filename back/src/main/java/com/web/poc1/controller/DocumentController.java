@@ -6,6 +6,7 @@ import com.web.poc1.model.ExcelRow;
 import com.web.poc1.service.DocumentService;
 import com.web.poc1.util.MessageHolder;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class DocumentController {
         return new ResponseEntity<>(documentService.getRows(), HttpStatus.OK);
     }
 
-    @PostMapping(value="/row")
+    @PostMapping(value = "/row")
     public ResponseEntity<ExcelRow> createRow() {
         return new ResponseEntity<>(documentService.createRow(), HttpStatus.OK);
     }
@@ -47,6 +48,12 @@ public class DocumentController {
     public ResponseEntity deleteRows(@RequestBody Map<Integer, String> rows) {
         this.documentService.deleteRows(rows);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/dynamic")
+    public ResponseEntity<List<ExcelRow>> getDynamic() {
+        return new ResponseEntity<>(this.documentService.findByDynamicSelector("Capital Markets", PageRequest.of(0, 2)),
+                HttpStatus.OK);
     }
 
 }
