@@ -3,9 +3,9 @@ package com.web.poc1.service;
 import com.web.poc1.dao.RowRepository;
 import com.web.poc1.exception.CustomException;
 import com.web.poc1.model.ExcelRow;
+import com.web.poc1.to.FindRequestTo;
 import com.web.poc1.util.AllowedFileTypes;
 import lombok.AllArgsConstructor;
-
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
@@ -54,9 +53,19 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<ExcelRow> getRows() {
-        return (List<ExcelRow>) rowRepository.findAll();
+    public FindRequestTo findByDynamicSelector(String platform, Integer unit, Integer account, String date, Double amount, Pageable pageable)
+            throws CustomException {
+        Page page = rowRepository.findAll((Specification<ExcelRow>) (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            addCriterias(platform, unit, account, date, amount, root, predicates, criteriaBuilder);
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        }, pageable);
+
+        return new FindRequestTo(page.getContent(), page.getTotalPages());
     }
+
 
     @Override
     public ExcelRow createRow() throws CustomException {
@@ -76,7 +85,7 @@ public class DocumentServiceImpl implements DocumentService {
     public void deleteRows(Map<Integer, String> rows) {
         try {
 
-            List<Long> ids = new ArrayList();
+            List<Long> ids = new ArrayList<>();
             for (Map.Entry<Integer, String> e : rows.entrySet()) {
                 ids.add(Long.parseLong(e.getValue()));
             }
@@ -145,6 +154,36 @@ public class DocumentServiceImpl implements DocumentService {
         }
     }
 
+    private void addCriterias(String platform, Integer unit, Integer account, String date, Double amount,
+                              Root<ExcelRow> root, List<Predicate> predicates, CriteriaBuilder criteriaBuilder) throws CustomException {
+        if (platform != null) {
+            predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("platform"), platform)));
+        }
+
+        if (unit != null) {
+            predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("unit"), unit)));
+        }
+
+        if (account != null) {
+            predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("account"), account)));
+        }
+
+        if (date != null) {
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+                java.util.Date parsedDate = simpleDateFormat.parse(date);
+                Date trueDate = new Date(parsedDate.getTime());
+                predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("date"), trueDate)));
+            } catch (ParseException e) {
+                throw new CustomException("Not a valid date", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        if (amount != null) {
+            predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("amount"), amount)));
+        }
+    }
+
     private List<ExcelRow> parseJsonArray(String json) {
         List<ExcelRow> result = new ArrayList<>();
         try {
@@ -174,32 +213,10 @@ public class DocumentServiceImpl implements DocumentService {
             date = new Date(parsedDate.getTime());
 
             excelRow.setDate(date);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
 
         return excelRow;
     }
-
-    @Override
-    public List<ExcelRow> findByDynamicSelector(String platform, Pageable pageable) {
-        Page page = rowRepository.findAll(new Specification<ExcelRow>() {
-            @Override
-            public Predicate toPredicate(Root<ExcelRow> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-                List<Predicate> predicates = new ArrayList<>();
-                if (platform != null) {
-                    predicates.add(criteriaBuilder.and(criteriaBuilder.like(root.get("platform"), platform)));
-                }
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-            }
-        }, pageable);
-
-        page.getTotalElements();
-        page.getTotalPages();
-
-        return page.getContent();
-    }
-
 }

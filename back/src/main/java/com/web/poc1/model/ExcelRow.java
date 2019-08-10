@@ -1,7 +1,9 @@
 package com.web.poc1.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.web.poc1.exception.CustomException;
+import com.web.poc1.service.DateSerializer;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
@@ -30,7 +32,7 @@ public class ExcelRow {
     private Integer account;
 
     @NonNull
-    @JsonFormat(pattern = "yyyy/MM/dd")
+    @JsonSerialize(using = DateSerializer.class)
     private Date date;
 
     @NonNull
