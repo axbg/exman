@@ -8,8 +8,10 @@ import com.web.poc1.util.AllowedFileTypes;
 import lombok.AllArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jettison.json.JSONArray;
@@ -27,7 +29,10 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -93,6 +98,65 @@ public class DocumentServiceImpl implements DocumentService {
             rowRepository.deleteByIdIn(ids);
         } catch (EmptyResultDataAccessException exception) {
 
+        }
+    }
+
+    @Override
+    public InputStream generateFilteredDocument(String platform, Integer unit, Integer account, String date, Double amount) throws CustomException {
+
+        List<ExcelRow> results = rowRepository.findAll((Specification<ExcelRow>) (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            addCriterias(platform, unit, account, date, amount, root, predicates, criteriaBuilder);
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        });
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("result");
+
+        Row headerRow = sheet.createRow(0);
+        Cell platformCell = headerRow.createCell(0);
+        platformCell.setCellValue("Platform");
+
+        Cell unitCell = headerRow.createCell(1);
+        unitCell.setCellValue("Unit");
+
+        Cell accountCell = headerRow.createCell(2);
+        accountCell.setCellValue("Account");
+
+        Cell dateCell = headerRow.createCell(3);
+        dateCell.setCellValue("Date");
+
+        Cell amountCell = headerRow.createCell(4);
+        amountCell.setCellValue("Amount");
+
+        for (int index = 1, cellIndex = 0; index <= results.size(); index++, cellIndex = 0) {
+            Row row = sheet.createRow(index);
+
+            Cell platformDataCell = row.createCell(cellIndex);
+            platformDataCell.setCellValue(results.get(cellIndex++).getPlatform());
+
+            Cell unitDataCell = row.createCell(cellIndex);
+            unitDataCell.setCellValue(results.get(cellIndex++).getUnit());
+
+            Cell accountDataCell = row.createCell(cellIndex);
+            accountDataCell.setCellValue(results.get(cellIndex++).getAccount());
+
+            //add Excel date format and solve conversion correction
+            Cell dateDataCell = row.createCell(cellIndex);
+            dateDataCell.setCellValue(results.get(cellIndex++).getDate().toString());
+
+            Cell amountDataCell = row.createCell(cellIndex);
+            amountDataCell.setCellValue(results.get(cellIndex++).getAmount());
+        }
+
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            workbook.write(bos);
+            byte[] barray = bos.toByteArray();
+            InputStream is = new ByteArrayInputStream(barray);
+            return is;
+        } catch (IOException e) {
+            throw new CustomException("Error generating document", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
