@@ -68,8 +68,8 @@ public class DocumentController {
                                          @RequestParam(value = "date", required = false) String date,
                                          @RequestParam(value = "amount", required = false) Double amount,
                                          HttpServletResponse response) throws CustomException {
-        InputStream file = documentService.generateFilteredDocument(platform, unit, account, date, amount);
         try {
+            InputStream file = documentService.generateFilteredDocument(platform, unit, account, date, amount);
             IOUtils.copy(file, response.getOutputStream());
             response.setContentType(AllowedFileTypes.XLSX.getType());
             response.setHeader("Content-Disposition", "attachment; filename=\"Filtered_Results.xlsx\"");

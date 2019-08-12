@@ -8,10 +8,7 @@ import com.web.poc1.util.AllowedFileTypes;
 import lombok.AllArgsConstructor;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jettison.json.JSONArray;
@@ -97,7 +94,7 @@ public class DocumentServiceImpl implements DocumentService {
 
             rowRepository.deleteByIdIn(ids);
         } catch (EmptyResultDataAccessException exception) {
-
+            //continue execution
         }
     }
 
@@ -132,29 +129,31 @@ public class DocumentServiceImpl implements DocumentService {
         for (int index = 1, cellIndex = 0; index <= results.size(); index++, cellIndex = 0) {
             Row row = sheet.createRow(index);
 
-            Cell platformDataCell = row.createCell(cellIndex);
-            platformDataCell.setCellValue(results.get(cellIndex++).getPlatform());
+            Cell platformDataCell = row.createCell(cellIndex++);
+            platformDataCell.setCellValue(results.get(index - 1).getPlatform());
 
-            Cell unitDataCell = row.createCell(cellIndex);
-            unitDataCell.setCellValue(results.get(cellIndex++).getUnit());
+            Cell unitDataCell = row.createCell(cellIndex++);
+            unitDataCell.setCellValue(results.get(index - 1).getUnit());
 
-            Cell accountDataCell = row.createCell(cellIndex);
-            accountDataCell.setCellValue(results.get(cellIndex++).getAccount());
+            Cell accountDataCell = row.createCell(cellIndex++);
+            accountDataCell.setCellValue(results.get(index - 1).getAccount());
 
-            //add Excel date format and solve conversion correction
-            Cell dateDataCell = row.createCell(cellIndex);
-            dateDataCell.setCellValue(results.get(cellIndex++).getDate().toString());
+            CellStyle dateFormat = workbook.createCellStyle();
+            CreationHelper styleHelper = workbook.getCreationHelper();
+            dateFormat.setDataFormat(styleHelper.createDataFormat().getFormat("yyyy/MM/dd"));
+
+            Cell dateDataCell = row.createCell(cellIndex++);
+            dateDataCell.setCellValue(results.get(index - 1).getDate());
+            dateDataCell.setCellStyle(dateFormat);
 
             Cell amountDataCell = row.createCell(cellIndex);
-            amountDataCell.setCellValue(results.get(cellIndex++).getAmount());
+            amountDataCell.setCellValue(results.get(index - 1).getAmount());
         }
 
         try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            workbook.write(bos);
-            byte[] barray = bos.toByteArray();
-            InputStream is = new ByteArrayInputStream(barray);
-            return is;
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            workbook.write(output);
+            return new ByteArrayInputStream(output.toByteArray());
         } catch (IOException e) {
             throw new CustomException("Error generating document", HttpStatus.INTERNAL_SERVER_ERROR);
         }
