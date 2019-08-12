@@ -37,8 +37,4 @@ export class HttpManagerService {
       .toPromise();
   }
 
-  async deleteRows(url: String, params) {
-    return this.httpClient.post(Constants.API_ENDPOINT + url, params, { headers: this.createHeaders({ 'enctype': 'multipart/form-data' }) })
-      .toPromise();
-  }
 }

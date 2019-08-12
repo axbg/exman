@@ -31,12 +31,12 @@ body {
     margin-top: 100px;
 }
 
-.ng-star-inserted {
-    width: 100%;
-}
-
 .datatable-body-cell {
     padding: 0px !important;
+}
+
+.datatable-body-cell-label > input {
+    width: 100%;
 }
 
 .datatable-checkbox {

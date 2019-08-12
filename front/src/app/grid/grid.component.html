@@ -45,6 +45,11 @@
       style="height: 70vh;transform:rotateX(0dex);"
       [headerHeight]="50"
       [columnMode]="'force'"
+      [limit]="15"
+      [externalPaging]="true"
+      [count]="totalElements"
+      (page)='setPage($event)'
+      [offset]='pageOffset'
       [footerHeight]="30"
       [rowHeight]="auto"
       [rows]="filteredRows"
@@ -52,8 +57,7 @@
       [selectionType]="'checkbox'"
       [selectAllRowsOnPage]="false"
       [displayCheck]="displayCheck"
-      (select)='onSelect($event)'
-      [scrollbarH]="true">
+      (select)='onSelect($event)'>
       <ngx-datatable-column
       [width]="30"
       [sortable]="false"
@@ -115,7 +119,7 @@
     </ngx-datatable>
   </div>
   <div class="grid-controls" [hidden]='showSpinner'>
-      <button mat-raised-button color="primary" (click)="refresh()">Refresh</button>
+      <button mat-raised-button color="primary" (click)="download()">Download</button>
       <button mat-raised-button color="primary" (click)="removeFilters(); applyFilters();">Remove Filters</button>
       <button mat-raised-button color="primary" (click)="delete()">Delete</button>
       <button mat-raised-button [color]="!hasUpdates ? 'primary' : 'warm'" (click)="save()">Save</button>
