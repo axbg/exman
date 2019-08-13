@@ -19,6 +19,11 @@ export class HttpManagerService {
       .toPromise();
   }
 
+  async getBlobRequest(url: String) {
+    return this.httpClient.get(Constants.API_ENDPOINT + url, { headers: this.createHeaders(), responseType: "arraybuffer" })
+      .toPromise();
+  }
+
   async postRequest(url: String, params: Object) {
     const formData = new FormData();
     Object.keys(params).map(param => formData.append(param, params[param]))

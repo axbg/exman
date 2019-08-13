@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { HttpManagerService } from '../http-manager.service';
 import { ToastrService } from 'ngx-toastr';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
-import { Router } from '@angular/router';
 
 const typingInterval = 300;
 
@@ -35,7 +34,7 @@ export class GridComponent implements OnInit {
   typingTimer;
 
   constructor(private httpManager: HttpManagerService, private toastr: ToastrService,
-    private _hotkeysService: HotkeysService, private router: Router) {
+    private _hotkeysService: HotkeysService) {
     this._hotkeysService.add(new Hotkey('ctrl+s', (event: KeyboardEvent): boolean => {
       this.save();
       return false;
@@ -48,11 +47,7 @@ export class GridComponent implements OnInit {
   }
 
   async ngOnInit() {
-    await this.loadData("");
-    //get all platforms
-    //get all dates
-    this.filterPlatform();
-    this.filterDate();
+    await this.loadData("?meta=true");
     this.showSpinner = false;
   }
 
@@ -61,20 +56,20 @@ export class GridComponent implements OnInit {
       const result = await this.httpManager.getRequest("/documents" + filters);
       this.rows = <[]>result["rows"];
       this.totalElements = result["pages"];
+      this.loadDropdowns(result);
       this.filteredRows = this.rows;
     } catch (err) {
       this.toastr.error(err.error.message);
     }
   }
 
-  filterPlatform() {
-    this.platformDropdown = Array.from(new Set(this.rows.map(row => row.platform)));
-    this.platformDropdown.splice(0, 0, "");
-  }
-
-  filterDate() {
-    this.dateDropdown = Array.from(new Set(this.rows.map(row => row.date)));
-    this.dateDropdown.splice(0, 0, "");
+  loadDropdowns(result) {
+    if (result["platforms"] != null && result["dates"] != null) {
+      this.platformDropdown = result["platforms"];
+      this.platformDropdown.splice(0, 0, "");
+      this.dateDropdown = result["dates"];
+      this.dateDropdown.splice(0, 0, "");
+    }
   }
 
   async setPage(e) {
@@ -122,7 +117,6 @@ export class GridComponent implements OnInit {
   async applyFilters(preserveOffset?: boolean) {
     const filterUrl = this.filterProducer();
     await this.loadData(filterUrl);
-    this.router.navigateByUrl("/grid" + filterUrl);
     this.selected = [];
     !preserveOffset ? this.pageOffset = 0 : "";
   }
@@ -164,7 +158,8 @@ export class GridComponent implements OnInit {
   async save() {
     if (this.updated.length !== 0) {
       try {
-        await this.httpManager.putRequest("/documents", this.updated);
+        const result = await this.httpManager.putRequest("/documents", this.updated);
+        this.loadDropdowns(result);
         this.toastr.success("Rows updated");
         this.updated = [];
         this.hasUpdates = false;
@@ -203,18 +198,17 @@ export class GridComponent implements OnInit {
       this.updated.push(this.filteredRows[rowIndex]);
     }
 
-    if (cell === "platform") {
-      this.filterPlatform();
-    } else if (cell === "date") {
-      this.filterDate();
-    }
-
     this.hasUpdates = true;
   }
 
   async download() {
-    const file = await this.httpManager.getRequest("/documents/generate" + this.filterProducer());
-    
+    const file = await this.httpManager.getBlobRequest("/documents/generate" + this.filterProducer());
+    var newBlob = new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const data = window.URL.createObjectURL(newBlob);
+    var link = document.createElement('a');
+    link.href = data;
+    link.download = "filtered_results.xlsx";
+    link.click();
   }
 
 }
