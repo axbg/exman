@@ -34,13 +34,14 @@ public class DocumentController {
 
     @GetMapping
     public ResponseEntity<FindRequestTo> findRowsByFilter(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                                                          @RequestParam(value = "meta", required = false, defaultValue = "false") boolean meta,
                                                           @RequestParam(value = "platform", required = false) String platform,
                                                           @RequestParam(value = "unit", required = false) Integer unit,
                                                           @RequestParam(value = "account", required = false) Integer account,
                                                           @RequestParam(value = "date", required = false) String date,
                                                           @RequestParam(value = "amount", required = false) Double amount) throws CustomException {
-        return new ResponseEntity<>(this.documentService.findByDynamicSelector(platform, unit, account, date, amount,
-                PageRequest.of((page > 0) ? page - 1 : 0, 5)),
+        return new ResponseEntity<>(this.documentService.findByDynamicSelector(platform, meta, unit, account, date, amount,
+                PageRequest.of((page > 0) ? page - 1 : 0, 15)),
                 HttpStatus.OK);
     }
 
@@ -50,12 +51,11 @@ public class DocumentController {
     }
 
     @PutMapping
-    public ResponseEntity updateRows(@RequestBody String rows) {
-        this.documentService.updateRows(rows);
-        return new ResponseEntity(HttpStatus.OK);
+    public ResponseEntity<FindRequestTo> updateRows(@RequestBody String rows) {
+        return new ResponseEntity<>(this.documentService.updateRows(rows), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/delete/rows")
+    @PutMapping(value = "/delete/rows")
     public ResponseEntity deleteRows(@RequestBody Map<Integer, String> rows) {
         this.documentService.deleteRows(rows);
         return new ResponseEntity(HttpStatus.OK);

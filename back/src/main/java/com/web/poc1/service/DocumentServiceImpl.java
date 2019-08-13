@@ -55,19 +55,20 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public FindRequestTo findByDynamicSelector(String platform, Integer unit, Integer account, String date, Double amount, Pageable pageable)
+    public FindRequestTo findByDynamicSelector(String platform, boolean meta, Integer unit, Integer account, String date, Double amount, Pageable pageable)
             throws CustomException {
         Page page = rowRepository.findAll((Specification<ExcelRow>) (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             addCriterias(platform, unit, account, date, amount, root, predicates, criteriaBuilder);
+            query.orderBy(criteriaBuilder.desc(root.get("id")));
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         }, pageable);
 
-        return new FindRequestTo(page.getContent(), page.getTotalPages());
+        return !meta ? new FindRequestTo(page.getContent(), page.getTotalElements())
+                : this.enrichWithMeta(new FindRequestTo(page.getContent(), page.getTotalElements()));
     }
-
 
     @Override
     public ExcelRow createRow() throws CustomException {
@@ -76,10 +77,10 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<ExcelRow> updateRows(String rows) {
+    public FindRequestTo updateRows(String rows) {
         List<ExcelRow> excelRows = parseJsonArray(rows);
         this.rowRepository.saveAll(excelRows);
-        return new ArrayList<>();
+        return enrichWithMeta(new FindRequestTo(new ArrayList<>(), 0));
     }
 
     @Override
@@ -245,6 +246,12 @@ public class DocumentServiceImpl implements DocumentService {
         if (amount != null) {
             predicates.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("amount"), amount)));
         }
+    }
+
+    private FindRequestTo enrichWithMeta(FindRequestTo findRequestTo) {
+        findRequestTo.setPlatforms(this.rowRepository.getDistinctPlatforms());
+        findRequestTo.setDates(this.rowRepository.getDistinctDates());
+        return findRequestTo;
     }
 
     private List<ExcelRow> parseJsonArray(String json) {

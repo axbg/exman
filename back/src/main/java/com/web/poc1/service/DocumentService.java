@@ -7,21 +7,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
 public interface DocumentService {
     int uploadDocument(MultipartFile document) throws CustomException;
 
-    FindRequestTo findByDynamicSelector(String platform, Integer unit, Integer account, String date, Double amount, Pageable pageable);
+    FindRequestTo findByDynamicSelector(String platform, boolean meta, Integer unit, Integer account, String date, Double amount, Pageable pageable);
 
     ExcelRow createRow();
 
-    List<ExcelRow> updateRows(String rows);
+    FindRequestTo updateRows(String rows);
 
     void deleteRows(Map<Integer, String> rows);
 
     InputStream generateFilteredDocument(String platform, Integer unit, Integer account, String date, Double amount);
 
-    //createDocumentFromFilter
 }
