@@ -53,7 +53,7 @@ export class GridComponent implements OnInit {
 
   async loadData(filters: String) {
     try {
-      const result = await this.httpManager.getRequest("/documents" + filters);
+      const result = this.formatDate(await this.httpManager.getRequest("/documents" + filters));
       this.rows = <[]>result["rows"];
       this.totalElements = result["pages"];
       this.loadDropdowns(result);
@@ -63,11 +63,36 @@ export class GridComponent implements OnInit {
     }
   }
 
+  formatDate(result) {
+    result["rows"].forEach(element => {
+      element["date"] = this.formatDateToInput(element["date"]);
+    });
+
+    return result;
+  }
+
+  formatDateToInput(date) {
+    return date.replace(/\//g, "-");
+  }
+
+  formatInputToDate(result) {
+    const updatedFormatted = JSON.parse(JSON.stringify(result));
+
+    if (updatedFormatted instanceof Array) {
+      updatedFormatted.forEach(element => element["date"] = element["date"].replace(/-/g, "/"));
+    } else {
+      for (let index = 0; index < updatedFormatted["dates"].length; index++) {
+        updatedFormatted["dates"][index] = updatedFormatted["dates"][index].replace(/-/g, "/")
+      }
+    }
+    return updatedFormatted;
+  }
+
   loadDropdowns(result) {
     if (result["platforms"] != null && result["dates"] != null) {
       this.platformDropdown = result["platforms"];
       this.platformDropdown.splice(0, 0, "");
-      this.dateDropdown = result["dates"];
+      this.dateDropdown = this.formatInputToDate(result)["dates"];
       this.dateDropdown.splice(0, 0, "");
     }
   }
@@ -150,6 +175,7 @@ export class GridComponent implements OnInit {
       const result = await this.httpManager.postRequest("/documents/row", {});
       this.rows.push(result);
       this.removeFilters();
+      this.toastr.success("Row added");
     } catch (err) {
       this.toastr.error("Insert failed");
     }
@@ -158,7 +184,7 @@ export class GridComponent implements OnInit {
   async save() {
     if (this.updated.length !== 0) {
       try {
-        const result = await this.httpManager.putRequest("/documents", this.updated);
+        const result = await this.httpManager.putRequest("/documents", this.formatInputToDate(this.updated));
         this.loadDropdowns(result);
         this.toastr.success("Rows updated");
         this.updated = [];

@@ -35,7 +35,7 @@ body {
     padding: 0px !important;
 }
 
-.datatable-body-cell-label > input {
+.datatable-body-cell-label>input {
     width: 100%;
 }
 
@@ -43,11 +43,15 @@ body {
     padding-left: 5px;
 }
 
+input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-clear-button {
+    -webkit-appearance: none;
+    display: none;
+}
+
 @media only screen and (max-width: 1250px) {
     .hide-on-mobile {
         width: 90px;
     }
-
     .mat-form-field-infix {
         width: 100px !important;
     }
@@ -57,7 +61,6 @@ body {
     .hide-on-mobile {
         width: 70px;
     }
-
     .mat-form-field-infix {
         width: 70px !important;
     }

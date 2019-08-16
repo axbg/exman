@@ -28,7 +28,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HotkeyModule } from 'angular2-hotkeys';
 import { MatRippleModule } from '@angular/material/core';
 
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -59,7 +58,7 @@ import { MatRippleModule } from '@angular/material/core';
     LoadingBarRouterModule,
     MatProgressSpinnerModule,
     HotkeyModule.forRoot(),
-    MatRippleModule
+    MatRippleModule,
   ],
   providers: [
     {
