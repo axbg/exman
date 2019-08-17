@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpManagerService } from '../http-manager.service';
 import { ToastrService } from 'ngx-toastr';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
+import { InputValidatorService } from '../input-validator.service';
 
 const typingInterval = 300;
 
@@ -32,9 +33,10 @@ export class GridComponent implements OnInit {
   filteredRows = this.rows;
   showSpinner: boolean = true;
   typingTimer;
+  hasInvalidFields: boolean = false;
 
   constructor(private httpManager: HttpManagerService, private toastr: ToastrService,
-    private _hotkeysService: HotkeysService) {
+    private _hotkeysService: HotkeysService, private inputValidator: InputValidatorService) {
     this._hotkeysService.add(new Hotkey('ctrl+s', (event: KeyboardEvent): boolean => {
       this.save();
       return false;
@@ -65,14 +67,10 @@ export class GridComponent implements OnInit {
 
   formatDate(result) {
     result["rows"].forEach(element => {
-      element["date"] = this.formatDateToInput(element["date"]);
+      element["date"] = element["date"].replace(/\//g, "-");
     });
 
     return result;
-  }
-
-  formatDateToInput(date) {
-    return date.replace(/\//g, "-");
   }
 
   formatInputToDate(result) {
@@ -101,6 +99,40 @@ export class GridComponent implements OnInit {
     this.currentPage = e.offset + 1;
     await this.applyFilters();
     this.pageOffset = e.offset;
+  }
+
+  inputCheck(e, cell) {
+    if (e.keyCode !== 9) {
+      if (!this.inputValidator.validateFormat(e.keyCode, cell, e.target.value)
+        || this.inputValidator.hasMoreThanRequiredLength(e.target.value, e.keyCode, cell)) {
+        e.preventDefault();
+        return;
+      }
+
+      if (this.inputValidator.hasRequiredLength(e.target.value, e.keyCode, cell)) {
+        this.validateField(e);
+      } else {
+        this.invalidateField(e);
+      }
+    }
+  }
+
+  nullCheck(e) {
+    if (this.inputValidator.isEmpty(e.target.value)) {
+      this.invalidateField(e);
+    } else {
+      this.validateField(e)
+    }
+  }
+
+  validateField(e) {
+    e.target.style.backgroundColor = "white";
+    this.hasInvalidFields = false;
+  }
+
+  invalidateField(e) {
+    e.target.style.backgroundColor = "#FCC7C3";
+    this.hasInvalidFields = true;
   }
 
   applyAmountFilter(e) {
