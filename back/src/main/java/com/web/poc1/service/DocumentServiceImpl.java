@@ -196,7 +196,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private ExcelRow createExcelRow(Row row) throws CustomException {
-        nullCheck(row);
+        nullCheckAndValidate(row);
 
         String platform = row.getCell(0).getStringCellValue();
         Integer unit = (int) row.getCell(1).getNumericCellValue();
@@ -210,11 +210,15 @@ public class DocumentServiceImpl implements DocumentService {
         return new ExcelRow(platform, unit, account, date, amount);
     }
 
-    private void nullCheck(Row row) throws CustomException {
+    private void nullCheckAndValidate(Row row) throws CustomException {
         for (int index = 0; index < 5; index++) {
             if (row.getCell(index) == null) {
-                throw new CustomException("Empty cell: row " + row.getRowNum() + ", cell " + (index + 1), HttpStatus.BAD_REQUEST);
+                throw new CustomException("Empty cell: row " + (row.getRowNum() + 1) + ", cell " + (index + 1), HttpStatus.BAD_REQUEST);
             }
+        }
+
+        if (String.valueOf((int) row.getCell(2).getNumericCellValue()).length() != 7) {
+            throw new CustomException("Account length should be 7 chars: row " + (row.getRowNum() + 1) + ", cell 3", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -268,13 +272,18 @@ public class DocumentServiceImpl implements DocumentService {
         return result;
     }
 
-    private ExcelRow parseJson(JSONObject json) {
+    private ExcelRow parseJson(JSONObject json) throws CustomException {
         ExcelRow excelRow = new ExcelRow();
         try {
             excelRow.setId(json.getLong("id"));
             excelRow.setPlatform(json.getString("platform"));
             excelRow.setUnit(json.getInt("unit"));
             excelRow.setAccount(json.getInt("account"));
+
+            if (excelRow.getAccount().toString().length() != 7) {
+                throw new CustomException("Account length should be 7", HttpStatus.BAD_REQUEST);
+            }
+
             excelRow.setAmount(json.getDouble("amount"));
 
             Date date;
@@ -283,8 +292,14 @@ public class DocumentServiceImpl implements DocumentService {
             date = new Date(parsedDate.getTime());
 
             excelRow.setDate(date);
-        } catch (JSONException | ParseException e) {
-            e.printStackTrace();
+        } catch (JSONException | ParseException | CustomException e) {
+            if (e instanceof JSONException) {
+                throw new CustomException("JSON is not properly formatted", HttpStatus.BAD_REQUEST);
+            }
+            if (e instanceof ParseException) {
+                throw new CustomException("Date is not in a valid format", HttpStatus.BAD_REQUEST);
+            }
+            throw new CustomException(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         return excelRow;
