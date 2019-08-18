@@ -21,9 +21,9 @@ export class PanelComponent implements OnInit {
     }
   }
 
-  async handleUpload(filelist) {
-    const file = filelist[0];
-
+  async handleUpload(event) {
+    const file = event.target.files[0];
+    
     if (file.type !== "application/vnd.ms-excel" && file.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
       this.toastr.error("File should be either .xlsx or .xls");
       return;
@@ -34,6 +34,8 @@ export class PanelComponent implements OnInit {
       this.toastr.success(result["message"]);
     } catch (err) {
       this.toastr.error(err.error.message);
+    } finally {
+      event.target.value = "";
     }
   }
 

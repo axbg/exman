@@ -19,6 +19,11 @@ export class HttpManagerService {
       .toPromise();
   }
 
+  async getBlobRequest(url: String) {
+    return this.httpClient.get(Constants.API_ENDPOINT + url, { headers: this.createHeaders(), responseType: "arraybuffer" })
+      .toPromise();
+  }
+
   async postRequest(url: String, params: Object) {
     const formData = new FormData();
     Object.keys(params).map(param => formData.append(param, params[param]))
@@ -37,8 +42,4 @@ export class HttpManagerService {
       .toPromise();
   }
 
-  async deleteRows(url: String, params) {
-    return this.httpClient.post(Constants.API_ENDPOINT + url, params, { headers: this.createHeaders({ 'enctype': 'multipart/form-data' }) })
-      .toPromise();
-  }
 }

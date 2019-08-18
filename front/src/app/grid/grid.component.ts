@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { HttpManagerService } from '../http-manager.service';
 import { ToastrService } from 'ngx-toastr';
 import { HotkeysService, Hotkey } from 'angular2-hotkeys';
+import { InputValidatorService } from '../input-validator.service';
+
+const typingInterval = 300;
 
 @Component({
   selector: 'app-grid',
@@ -16,6 +19,9 @@ export class GridComponent implements OnInit {
   hasUpdates: boolean = false;
 
   platformDropdown = [];
+  currentPage = 1;
+  pageOffset = 0;
+  totalElements = 0;
   selectedPlatform = "";
   dateDropdown = [];
   selectedDate = "";
@@ -26,90 +32,169 @@ export class GridComponent implements OnInit {
   rows: any[] = [];
   filteredRows = this.rows;
   showSpinner: boolean = true;
+  typingTimer;
+  hasInvalidFields: boolean = false;
 
   constructor(private httpManager: HttpManagerService, private toastr: ToastrService,
-    private _hotkeysService: HotkeysService) {
-      this._hotkeysService.add(new Hotkey('ctrl+s', (event: KeyboardEvent): boolean => {
-        this.save();
-        return false; // Prevent bubbling
+    private _hotkeysService: HotkeysService, private inputValidator: InputValidatorService) {
+    this._hotkeysService.add(new Hotkey('ctrl+s', (event: KeyboardEvent): boolean => {
+      this.save();
+      return false;
     }));
 
-      this._hotkeysService.add(new Hotkey('ctrl+d', (event: KeyboardEvent): boolean => {
-        this.addRow();
-        return false; // Prevent bubbling
+    this._hotkeysService.add(new Hotkey('ctrl+d', (event: KeyboardEvent): boolean => {
+      this.addRow();
+      return false;
     }));
   }
 
   async ngOnInit() {
-    this.loadData();
+    await this.loadData("?meta=true");
+    this.showSpinner = false;
   }
 
-  async loadData() {
+  async loadData(filters: String) {
     try {
-      const result = await this.httpManager.getRequest("/documents");
-      this.rows = <[]>result;
-      this.filterPlatform();
-      this.filterDate();
+      const result = this.formatDate(await this.httpManager.getRequest("/documents" + filters));
+      this.rows = <[]>result["rows"];
+      this.totalElements = result["pages"];
+      this.loadDropdowns(result);
       this.filteredRows = this.rows;
-      this.showSpinner = false;
     } catch (err) {
       this.toastr.error(err.error.message);
     }
   }
 
-  filterPlatform() {
-    this.platformDropdown = Array.from(new Set(this.rows.map(row => row.platform)));
-    this.platformDropdown.splice(0, 0, "");
+  formatDate(result) {
+    result["rows"].forEach(element => {
+      element["date"] = element["date"].replace(/\//g, "-");
+    });
+
+    return result;
   }
 
-  filterDate() {
-    this.dateDropdown = Array.from(new Set(this.rows.map(row => row.date)));
-    this.dateDropdown.splice(0, 0, "");
+  formatInputToDate(result) {
+    const updatedFormatted = JSON.parse(JSON.stringify(result));
+
+    if (updatedFormatted instanceof Array) {
+      updatedFormatted.forEach(element => element["date"] = element["date"].replace(/-/g, "/"));
+    } else {
+      for (let index = 0; index < updatedFormatted["dates"].length; index++) {
+        updatedFormatted["dates"][index] = updatedFormatted["dates"][index].replace(/-/g, "/")
+      }
+    }
+    return updatedFormatted;
+  }
+
+  loadDropdowns(result) {
+    if (result["platforms"] != null && result["dates"] != null) {
+      this.platformDropdown = result["platforms"];
+      this.platformDropdown.splice(0, 0, "");
+      this.dateDropdown = this.formatInputToDate(result)["dates"];
+      this.dateDropdown.splice(0, 0, "");
+    }
+  }
+
+  async setPage(e) {
+    this.currentPage = e.offset + 1;
+    await this.applyFilters();
+    this.pageOffset = e.offset;
+  }
+
+  inputCheck(e, cell) {
+    if (e.keyCode !== 9) {
+      if (!this.inputValidator.validateFormat(e.keyCode, cell, e.target.value)
+        || this.inputValidator.hasMoreThanRequiredLength(e.target.value, e.keyCode, cell)) {
+        e.preventDefault();
+        return;
+      }
+
+      if (this.inputValidator.hasRequiredLength(e.target.value, e.keyCode, cell)) {
+        this.validateField(e);
+      } else {
+        this.invalidateField(e);
+      }
+    }
+  }
+
+  nullCheck(e) {
+    if (this.inputValidator.isEmpty(e.target.value)) {
+      this.invalidateField(e);
+    } else {
+      this.validateField(e)
+    }
+  }
+
+  validateField(e) {
+    e.target.style.backgroundColor = "white";
+    this.hasInvalidFields = false;
+  }
+
+  invalidateField(e) {
+    e.target.style.backgroundColor = "#FCC7C3";
+    this.hasInvalidFields = true;
   }
 
   applyAmountFilter(e) {
     this.amountFilter = e;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.pageOffset = 0;
+    this.computeTypingDelay();
   }
 
   applyUnitFilter(e) {
     this.unitFilter = e;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.computeTypingDelay();
   }
 
   applyAccountFilter(e) {
     this.accountFilter = e;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.computeTypingDelay();
   }
 
   applyPlatformFilter(e) {
     this.selectedPlatform = e;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.computeTypingDelay();
   }
 
   applyDateFilter(e) {
     this.selectedDate = e;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.computeTypingDelay();
   }
 
-  applyFilters() {
-    if (this.amountFilter === "" && this.amountFilter && this.amountFilter && this.amountFilter && this.amountFilter) {
-      this.filteredRows = this.rows;
-    } else {
-      this.filteredRows = this.rows.filter(row => row.amount.toString().startsWith(this.amountFilter))
-        .filter(row => row.unit.toString().startsWith(this.unitFilter))
-        .filter(row => row.account.toString().startsWith(this.accountFilter))
-        .filter(row => this.selectedPlatform !== "" ? this.selectedPlatform === row.platform : true)
-        .filter(row => this.selectedDate !== "" ? this.selectedDate === row.date : true);
-    }
+  computeTypingDelay() {
+    clearTimeout(this.typingTimer);
+    this.typingTimer = setTimeout(() => this.applyFilters(), typingInterval);
+  }
+
+  async applyFilters(preserveOffset?: boolean) {
+    const filterUrl = this.filterProducer();
+    await this.loadData(filterUrl);
+    this.selected = [];
+    !preserveOffset ? this.pageOffset = 0 : "";
+  }
+
+  filterProducer(): String {
+    return "?page=" + this.currentPage +
+      (this.selectedPlatform != "" ? "&platform=" + encodeURIComponent(this.selectedPlatform) : "") +
+      (this.unitFilter != "" ? "&unit=" + this.unitFilter : "") +
+      (this.accountFilter != "" ? "&account=" + this.accountFilter : "") +
+      (this.selectedDate != "" ? "&date=" + this.selectedDate : "") +
+      (this.amountFilter != "" ? "&amount=" + this.amountFilter : "");
   }
 
   removeFilters() {
-    this.amountFilter = "";
-    this.accountFilter = "";
     this.selectedPlatform = "";
-    this.selectedDate = "";
     this.unitFilter = "";
+    this.accountFilter = "";
+    this.selectedDate = "";
+    this.amountFilter = "";
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
   onSelect({ selected }) {
@@ -122,21 +207,17 @@ export class GridComponent implements OnInit {
       const result = await this.httpManager.postRequest("/documents/row", {});
       this.rows.push(result);
       this.removeFilters();
-      this.applyFilters();
-      const dt = document.getElementsByTagName('datatable-body')[0];
-      setTimeout(() => {
-        dt.scrollTo(0, dt.scrollHeight);
-        this.toastr.success("Row added");
-      }, 10);
+      this.toastr.success("Row added");
     } catch (err) {
       this.toastr.error("Insert failed");
     }
   }
 
   async save() {
-    if(this.updated.length !== 0) {
+    if (this.updated.length !== 0) {
       try {
-        await this.httpManager.putRequest("/documents", this.updated);
+        const result = await this.httpManager.putRequest("/documents", this.formatInputToDate(this.updated));
+        this.loadDropdowns(result);
         this.toastr.success("Rows updated");
         this.updated = [];
         this.hasUpdates = false;
@@ -150,10 +231,10 @@ export class GridComponent implements OnInit {
     if (this.selected.length !== 0 && confirm("Are you sure you want to delete?")) {
       try {
         const selectedIds = this.selected.map(select => select.id);
-        await this.httpManager.deleteRows("/documents/delete/rows", { ...selectedIds });
+        await this.httpManager.putRequest("/documents/delete/rows", { ...selectedIds });
         this.rows = this.rows.filter(row => !selectedIds.includes(row.id));
         this.selected = [];
-        this.applyFilters();
+        this.applyFilters(true);
         this.toastr.success("Rows deleted");
       } catch (err) {
         this.toastr.error(err.error.message);
@@ -175,19 +256,21 @@ export class GridComponent implements OnInit {
       this.updated.push(this.filteredRows[rowIndex]);
     }
 
-    if (cell === "platform") {
-      this.filterPlatform();
-    } else if (cell === "date") {
-      this.filterDate();
-    }
-
     this.hasUpdates = true;
   }
 
-  refresh() {
-    this.showSpinner = true;
-    this.removeFilters();
-    this.loadData();
+  computeDate() {
+    const cd = new Date();
+    return cd.getDate() + "-" + cd.getMonth() + "-" + cd.getFullYear() + " " + cd.getHours() + ":" + cd.getMinutes();
   }
 
+  async download() {
+    const file = await this.httpManager.getBlobRequest("/documents/generate" + this.filterProducer());
+    var newBlob = new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const data = window.URL.createObjectURL(newBlob);
+    var link = document.createElement('a');
+    link.href = data;
+    link.download = "Filtered Results " + this.computeDate() + ".xlsx";
+    link.click();
+  }
 }
