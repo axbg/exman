@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 enum maxLengths {
-  account = 8
+  account = 7
 }
 
 @Injectable({
@@ -44,5 +44,4 @@ export class InputValidatorService {
         return true;
     }
   }
-
 }

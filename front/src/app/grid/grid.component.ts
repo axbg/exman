@@ -259,14 +259,18 @@ export class GridComponent implements OnInit {
     this.hasUpdates = true;
   }
 
+  computeDate() {
+    const cd = new Date();
+    return cd.getDate() + "-" + cd.getMonth() + "-" + cd.getFullYear() + " " + cd.getHours() + ":" + cd.getMinutes();
+  }
+
   async download() {
     const file = await this.httpManager.getBlobRequest("/documents/generate" + this.filterProducer());
     var newBlob = new Blob([file], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const data = window.URL.createObjectURL(newBlob);
     var link = document.createElement('a');
     link.href = data;
-    link.download = "filtered_results.xlsx";
+    link.download = "Filtered Results " + this.computeDate() + ".xlsx";
     link.click();
   }
-
 }
