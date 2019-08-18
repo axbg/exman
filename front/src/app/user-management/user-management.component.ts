@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class UserManagementComponent implements OnInit {
 
-  private form: FormGroup;
+  form: FormGroup;
   username: String;
   password: String;
   isAdmin: boolean = false;

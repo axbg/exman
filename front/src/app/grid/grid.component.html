@@ -130,6 +130,6 @@
       <button mat-raised-button color="primary" (click)="removeFilters(); applyFilters();">Remove Filters</button>
       <button mat-raised-button color="primary" (click)="delete()">Delete</button>
       <button mat-raised-button [color]="!hasUpdates ? 'primary' : 'warm'" (click)="save()" [disabled]="hasInvalidFields">Save</button>
-      <button mat-raised-button color="primary" (click)="addRow($event)">Add</button>
+      <button mat-raised-button color="primary" (click)="addRow()">Add</button>
   </div>
 </div>
