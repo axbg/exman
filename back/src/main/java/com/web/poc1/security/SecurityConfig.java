@@ -30,6 +30,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(
+            new AntPathRequestMatcher("/*"),
             new AntPathRequestMatcher("/api/user/login")
     );
     private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
@@ -58,8 +59,6 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(STATELESS)
                 .and()
                 .exceptionHandling()
-                // this entry point handles when you request a protected page and you are not yet
-                // authenticated
                 .defaultAuthenticationEntryPointFor(forbiddenEntryPoint(), PROTECTED_URLS)
                 .and()
                 .authenticationProvider(provider)
