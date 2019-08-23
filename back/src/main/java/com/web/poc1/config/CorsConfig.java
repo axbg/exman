@@ -1,10 +1,10 @@
 package com.web.poc1.config;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+// used on front-end development to allow cors
+//@Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
     @Override

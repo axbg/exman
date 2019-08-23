@@ -2,7 +2,6 @@ package com.web.poc1.service;
 
 import com.web.poc1.dao.UserRepository;
 import com.web.poc1.exception.CustomException;
-import com.web.poc1.model.ExcelRow;
 import com.web.poc1.model.User;
 import lombok.AllArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -70,7 +69,7 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.deleteById(id);
         } catch (EmptyResultDataAccessException ex) {
-
+            //user not found - nothing to do
         }
     }
 
